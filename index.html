@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本旅行计划</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- 日文字体 Noto Serif JP（上方）| 中文字体 Noto Serif SC（下方）-->
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/gist-sync.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <!-- 侧边导航 (桌面端) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">旅行計画</h1>
+                <p class="subtitle">Journey Plan</p>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="home">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span>首页</span>
+                </button>
+                <button class="nav-tab" data-tab="itinerary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                        <line x1="16" x2="16" y1="2" y2="6" />
+                        <line x1="8" x2="8" y1="2" y2="6" />
+                        <line x1="3" x2="21" y1="10" y2="10" />
+                    </svg>
+                    <span>行程概览</span>
+                </button>
+                <button class="nav-tab" data-tab="luggage">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 20h0a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h0" />
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        <path d="M12 13v5" />
+                        <path d="M10 15h4" />
+                    </svg>
+                    <span>行李清单</span>
+                </button>
+                <button class="nav-tab" data-tab="places">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span>目的地</span>
+                </button>
+                <button class="nav-tab" data-tab="hotels">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z" />
+                        <path d="m9 16 .348-.24c1.465-1.013 3.84-1.013 5.304 0L15 16" />
+                        <path d="M8 7h.01" />
+                        <path d="M16 7h.01" />
+                        <path d="M12 7h.01" />
+                        <path d="M12 11h.01" />
+                        <path d="M16 11h.01" />
+                        <path d="M8 11h.01" />
+                    </svg>
+                    <span>酒店</span>
+                </button>
+                <button class="nav-tab" data-tab="notes">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" x2="8" y1="13" y2="13" />
+                        <line x1="16" x2="8" y1="17" y2="17" />
+                        <line x1="10" x2="8" y1="9" y2="9" />
+                    </svg>
+                    <span>备注</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-secondary" id="exportBtn">导出数据</button>
+                <button class="btn-secondary" id="importBtn">导入数据</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+                <button class="btn-primary" id="openSettingsBtnDesktop">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    云同步
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 首页 (移动端) -->
+            <section class="tab-content active" id="home">
+                <!-- 出行倒计时 -->
+                <div class="countdown-banner" id="countdownBanner">
+                    <span class="countdown-label">距离出发还有</span>
+                    <span class="countdown-value" id="countdownValue">-- 天</span>
+                </div>
+                <div class="home-header">
+                    <h1 class="home-logo">旅行計画</h1>
+                    <p class="home-subtitle">Journey Plan</p>
+                </div>
+                <div class="home-actions">
+                    <button class="btn-secondary" id="mobileExportBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" x2="12" y1="3" y2="15" />
+                        </svg>
+                        导出数据
+                    </button>
+                    <button class="btn-secondary" id="mobileImportBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" x2="12" y1="15" y2="3" />
+                        </svg>
+                        导入数据
+                    </button>
+                    <button class="btn-primary" id="openSettingsBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        云同步
+                    </button>
+                </div>
+            </section>
+            <input type="file" id="mobileImportFile" accept=".json" style="display: none;">
+
+            <!-- 行程概览 -->
+            <section class="tab-content" id="itinerary">
+                <div class="section-header">
+                    <h2>行程概览</h2>
+                    <button class="btn-primary" id="addDayBtn">添加日程</button>
+                </div>
+                <div class="itinerary-timeline" id="itineraryTimeline">
+                    <!-- 动态生成 -->
+                </div>
+            </section>
+
+            <!-- 行李清单 -->
+            <section class="tab-content" id="luggage">
+                <div class="section-header">
+                    <h2>行李清单</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="resetLuggageBtn">重置清单</button>
+                        <button class="btn-primary" id="addCategoryBtn">添加分类</button>
+                    </div>
+                </div>
+                <div class="luggage-container" id="luggageContainer">
+                    <!-- 动态生成 -->
+                </div>
+            </section>
+
+            <!-- 目的地 -->
+            <section class="tab-content" id="places">
+                <div class="section-header">
+                    <h2>目的地 & 餐厅</h2>
+                    <div class="header-actions">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">全部</button>
+                            <button class="filter-tab" data-filter="attraction">景点</button>
+                            <button class="filter-tab" data-filter="restaurant">餐厅</button>
+                            <button class="filter-tab" data-filter="shopping">购物</button>
+                        </div>
+                        <button class="btn-primary" id="addPlaceBtn">添加地点</button>
+                    </div>
+                </div>
+                <div class="places-grid" id="placesGrid">
+                    <!-- 动态生成 -->
+                </div>
+            </section>
+
+            <!-- 酒店 -->
+            <section class="tab-content" id="hotels">
+                <div class="section-header">
+                    <h2>酒店</h2>
+                    <button class="btn-primary" id="addHotelBtn">添加酒店</button>
+                </div>
+                <div class="hotels-list" id="hotelsList">
+                    <!-- 动态生成 -->
+                </div>
+            </section>
+
+            <!-- 备注 -->
+            <section class="tab-content" id="notes">
+                <div class="section-header">
+                    <h2>杂项备注</h2>
+                    <button class="btn-primary" id="addNoteBtn">添加分类</button>
+                </div>
+                <div class="notes-container" id="notesContainer">
+                    <!-- 动态生成 -->
+                </div>
+            </section>
+        </main>
+
+        <!-- 底部导航 (移动端) -->
+        <nav class="mobile-nav">
+            <button class="mobile-nav-tab active" data-tab="home">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <span>首页</span>
+            </button>
+            <button class="mobile-nav-tab" data-tab="itinerary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                </svg>
+                <span>行程</span>
+            </button>
+            <button class="mobile-nav-tab" data-tab="luggage">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 20h0a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h0" />
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+                <span>行李</span>
+            </button>
+            <button class="mobile-nav-tab" data-tab="places">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span>地点</span>
+            </button>
+            <button class="mobile-nav-tab" data-tab="hotels">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z" />
+                    <path d="m9 16 .348-.24c1.465-1.013 3.84-1.013 5.304 0L15 16" />
+                    <path d="M8 7h.01" />
+                    <path d="M16 7h.01" />
+                    <path d="M12 7h.01" />
+                    <path d="M12 11h.01" />
+                    <path d="M16 11h.01" />
+                    <path d="M8 11h.01" />
+                </svg>
+                <span>酒店</span>
+            </button>
+            <button class="mobile-nav-tab" data-tab="notes">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" x2="8" y1="13" y2="13" />
+                    <line x1="16" x2="8" y1="17" y2="17" />
+                    <line x1="10" x2="8" y1="9" y2="9" />
+                </svg>
+                <span>备注</span>
+            </button>
+        </nav>
+
+        <!-- 下拉刷新指示器 -->
+        <div class="pull-to-refresh" id="pullToRefresh">
+            <div class="pull-to-refresh-content">
+                <svg class="refresh-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                    <path d="M16 16h5v5" />
+                </svg>
+                <span class="refresh-text">下拉刷新</span>
+            </div>
+        </div>
+
+        <!-- 设置面板 -->
+        <div class="settings-overlay" id="settingsOverlay">
+            <div class="settings-panel">
+                <div class="settings-header">
+                    <h3>云同步设置</h3>
+                    <button class="settings-close" id="settingsClose">&times;</button>
+                </div>
+                <div class="settings-body">
+                    <div class="sync-status" id="syncStatus">
+                        <div class="sync-indicator"></div>
+                        <span>未连接</span>
+                    </div>
+                    <div class="form-group">
+                        <label>GitHub Personal Access Token</label>
+                        <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxx">
+                        <small>需要 Gist 权限，可在 GitHub Settings > Developer settings > Personal access tokens 生成</small>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="btn-primary" id="connectGistBtn">连接</button>
+                        <button class="btn-secondary" id="syncNowBtn" disabled>立即同步</button>
+                    </div>
+                    <div class="settings-info" id="settingsInfo" style="display: none;">
+                        <p>Gist ID: <code id="gistIdDisplay"></code></p>
+                        <button class="btn-danger btn-sm" id="disconnectBtn">断开连接</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">标题</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 动态内容 -->
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <button class="btn-secondary" id="modalCancel">取消</button>
+                <button class="btn-primary" id="modalConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div class="toast" id="toast">
+        <span class="toast-message"></span>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
