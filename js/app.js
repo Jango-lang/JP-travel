@@ -1419,12 +1419,19 @@ let pullCurrentY = 0;
 let isPulling = false;
 let isRefreshing = false;
 
+function isAnyModalOpen() {
+    const modalOverlay = document.getElementById('modalOverlay');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    return modalOverlay?.classList.contains('active') || settingsOverlay?.classList.contains('active');
+}
+
 function initPullToRefresh() {
     const pullEl = document.getElementById('pullToRefresh');
     if (!pullEl) return;
 
     document.addEventListener('touchstart', (e) => {
         if (isRefreshing) return;
+        if (isAnyModalOpen()) return;
         if (window.scrollY === 0) {
             pullStartY = e.touches[0].pageY;
             isPulling = true;
@@ -1433,6 +1440,10 @@ function initPullToRefresh() {
 
     document.addEventListener('touchmove', (e) => {
         if (!isPulling || isRefreshing) return;
+        if (isAnyModalOpen()) {
+            isPulling = false;
+            return;
+        }
         pullCurrentY = e.touches[0].pageY;
         const pullDistance = Math.max(0, pullCurrentY - pullStartY);
 
@@ -1460,7 +1471,7 @@ function initPullToRefresh() {
         isPulling = false;
 
         const pullDistance = pullCurrentY - pullStartY;
-        if (pullDistance > 80 && !isRefreshing) {
+        if (pullDistance > 80 && !isRefreshing && !isAnyModalOpen()) {
             triggerRefresh();
         } else {
             resetPull();
