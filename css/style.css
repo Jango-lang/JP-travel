@@ -431,13 +431,25 @@ body {
     box-shadow: 0 2px 12px var(--color-shadow);
 }
 
-.category-header {
+.luggage-category .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--color-border);
+    gap: 8px;
+}
+
+.luggage-category .category-header > div:nth-of-type(2) {
+  
+    flex: 1;
+}
+
+.luggage-category .category-title {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .category-title {
@@ -520,6 +532,44 @@ body {
     background: var(--color-accent-light);
 }
 
+/* ========================================
+   Drag Handle & Sortable
+   ======================================== */
+.drag-handle {
+    cursor: grab;
+    color: var(--color-text-secondary);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.drag-handle:hover {
+    color: var(--color-text);
+    background: var(--color-bg);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.luggage-category,
+.place-card,
+.note-category {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.drag-over {
+    outline: 2px dashed var(--color-accent);
+    outline-offset: 4px;
+    transform: scale(1.01);
+}
+
+.drag-over.drag-handle {
+    background: var(--color-accent-light);
+}
+
 .add-item-row {
     display: flex;
     gap: 8px;
@@ -589,11 +639,27 @@ body {
     overflow: hidden;
     box-shadow: 0 2px 12px var(--color-shadow);
     transition: var(--transition);
+    position: relative;
 }
 
 .place-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px var(--color-shadow);
+}
+
+.place-card .drag-handle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.place-card:hover .drag-handle {
+    opacity: 1;
 }
 
 .place-image {
@@ -863,11 +929,20 @@ body {
 
 .note-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--color-border);
+    gap: 8px;
+}
+
+.note-header > .drag-handle {
+    flex-shrink: 0;
+}
+
+.note-header > .note-title {
+    flex: 1;
+    min-width: 0;
 }
 
 .note-title {

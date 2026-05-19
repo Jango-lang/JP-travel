@@ -475,6 +475,126 @@ function deleteActivity(dayId, actIndex) {
 }
 
 // ========================================
+// 拖拽排序
+// ========================================
+
+let draggedItem = null;
+let draggedType = null; // 'luggage', 'place', 'note'
+
+function initDragAndDrop() {
+    document.addEventListener('dragstart', handleDragStart);
+    document.addEventListener('dragend', handleDragEnd);
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('dragenter', handleDragEnter);
+    document.addEventListener('dragleave', handleDragLeave);
+    document.addEventListener('drop', handleDrop);
+}
+
+function handleDragStart(e) {
+    const target = e.target.closest('[data-draggable]');
+    if (!target) return;
+    
+    draggedItem = target;
+    draggedType = target.dataset.draggable;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', '');
+    
+    target.style.opacity = '0.5';
+}
+
+function handleDragEnd(e) {
+    if (draggedItem) {
+        draggedItem.style.opacity = '1';
+    }
+    draggedItem = null;
+    draggedType = null;
+    
+    document.querySelectorAll('.drag-over').forEach(el => {
+        el.classList.remove('drag-over');
+    });
+}
+
+function handleDragOver(e) {
+    const target = e.target.closest('[data-draggable]');
+    if (!target || target === draggedItem) return;
+    
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDragEnter(e) {
+    const target = e.target.closest('[data-draggable]');
+    if (!target || target === draggedItem) return;
+    
+    target.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    const target = e.target.closest('[data-draggable]');
+    if (!target) return;
+    
+    const rect = target.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+        target.classList.remove('drag-over');
+    }
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    
+    const target = e.target.closest('[data-draggable]');
+    if (!target || target === draggedItem) return;
+    
+    target.classList.remove('drag-over');
+    
+    if (!draggedItem || draggedItem.dataset.draggable !== draggedType) return;
+    
+    const draggedId = draggedItem.dataset.itemId;
+    const targetId = target.dataset.itemId;
+    
+    let dataArray;
+    switch (draggedType) {
+        case 'luggage':
+            dataArray = appData.luggage;
+            break;
+        case 'place':
+            dataArray = appData.places;
+            break;
+        case 'note':
+            dataArray = appData.notes;
+            break;
+        default:
+            return;
+    }
+    
+    const draggedIndex = dataArray.findIndex(item => item.id === draggedId);
+    const targetIndex = dataArray.findIndex(item => item.id === targetId);
+    
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+        const [removed] = dataArray.splice(draggedIndex, 1);
+        dataArray.splice(targetIndex, 0, removed);
+        saveData(appData);
+        
+        switch (draggedType) {
+            case 'luggage':
+                renderLuggage();
+                break;
+            case 'place':
+                renderPlaces();
+                break;
+            case 'note':
+                renderNotes();
+                break;
+        }
+        
+        showToast('已调整顺序');
+    }
+}
+
+// ========================================
 // 行李清单
 // ========================================
 
@@ -487,8 +607,11 @@ function renderLuggage() {
         const progress = total > 0 ? Math.round(checked / total * 100) : 0;
 
         return `
-            <div class="luggage-category" data-cat-id="${cat.id}">
+            <div class="luggage-category" data-draggable="luggage" data-item-id="${cat.id}" draggable="true">
                 <div class="category-header">
+                    <div class="drag-handle" title="拖拽排序">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    </div>
                     <div>
                         <h3 class="category-title">${cat.name}</h3>
                         <span class="category-progress">${checked}/${total} 已打包 (${progress}%)</span>
@@ -645,13 +768,16 @@ function renderPlaces() {
     }
 
     container.innerHTML = places.map(place => `
-        <div class="place-card" data-place-id="${place.id}">
+        <div class="place-card" data-draggable="place" data-item-id="${place.id}" draggable="true">
             <div class="place-image">
                 ${place.image ? `<img src="${place.image}" alt="${place.name}">` : `
                     <div class="placeholder-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                     </div>
                 `}
+            </div>
+            <div class="drag-handle" title="拖拽排序">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
             </div>
             <div class="place-content">
                 <div class="place-header">
@@ -1056,8 +1182,11 @@ function renderNotes() {
     }
 
     container.innerHTML = appData.notes.map(note => `
-        <div class="note-category" data-note-id="${note.id}">
+        <div class="note-category" data-draggable="note" data-item-id="${note.id}" draggable="true">
             <div class="note-header">
+                <div class="drag-handle" title="拖拽排序">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </div>
                 <h3 class="note-title">${note.title}</h3>
                 <div class="category-actions">
                     <button class="btn-secondary btn-sm" onclick="editNoteTitle('${note.id}')">重命名</button>
@@ -1385,6 +1514,8 @@ async function initApp() {
     // 尝试从 Gist 加载数据
     await autoLoadFromGist();
     appData = loadData();
+    
+    initDragAndDrop();
     renderItinerary();
     renderLuggage();
     renderPlaces();
