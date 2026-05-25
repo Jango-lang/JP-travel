@@ -65,6 +65,11 @@ const defaultData = {
             ]
         }
     ],
+    categories: [
+        { id: 'cat-place-1', name: '景点', color: '#4A90D9', order: 0 },
+        { id: 'cat-place-2', name: '餐厅', color: '#E67E22', order: 1 },
+        { id: 'cat-place-3', name: '购物', color: '#27AE60', order: 2 }
+    ],
     places: [],
     hotels: [],
     notes: [
@@ -231,6 +236,11 @@ function openModal(title, bodyContent, onConfirm, showFooter = true) {
     }
 
     overlay.classList.add('active');
+    
+    // 初始化图标和颜色选择器事件
+    setTimeout(() => {
+        initIconPickerEvents();
+    }, 50);
 }
 
 function closeModal() {
@@ -743,17 +753,51 @@ function resetLuggage() {
 }
 
 // ========================================
-// 目的地
+// 目的地 & 分类管理
 // ========================================
 
 let currentFilter = 'all';
+
+// 预设颜色池
+const COLOR_POOL = [
+    '#4A90D9', '#E67E22', '#27AE60', '#9B59B6', '#E74C3C',
+    '#1ABC9C', '#F39C12', '#34495E', '#16A085', '#2980B9',
+    '#8E44AD', '#C0392B', '#D35400', '#7F8C8D', '#2C3E50'
+];
+
+function renderFilterTabs() {
+    const filterTabs = document.querySelector('.filter-tabs');
+    const categories = appData.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    let tabsHtml = `<button class="filter-tab ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">全部</button>`;
+    
+    categories.forEach(cat => {
+        tabsHtml += `<button class="filter-tab ${currentFilter === cat.id ? 'active' : ''}" 
+                          data-filter="${cat.id}" 
+                          style="--tab-color: ${cat.color}">
+                          ${cat.name}
+                      </button>`;
+    });
+    
+    filterTabs.innerHTML = tabsHtml;
+    
+    // 重新绑定点击事件
+    filterTabs.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            filterTabs.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.dataset.filter;
+            renderPlaces();
+        });
+    });
+}
 
 function renderPlaces() {
     const container = document.getElementById('placesGrid');
 
     let places = appData.places;
     if (currentFilter !== 'all') {
-        places = places.filter(p => p.type === currentFilter);
+        places = places.filter(p => p.categoryId === currentFilter);
     }
 
     if (places.length === 0) {
@@ -767,7 +811,12 @@ function renderPlaces() {
         return;
     }
 
-    container.innerHTML = places.map(place => `
+    container.innerHTML = places.map(place => {
+        const category = appData.categories.find(c => c.id === place.categoryId);
+        const categoryName = category ? category.name : '未分类';
+        const categoryColor = category ? category.color : '#666';
+        
+        return `
         <div class="place-card" data-draggable="place" data-item-id="${place.id}" draggable="true">
             <div class="place-image">
                 ${place.image ? `<img src="${place.image}" alt="${place.name}">` : `
@@ -782,7 +831,9 @@ function renderPlaces() {
             <div class="place-content">
                 <div class="place-header">
                     <h3 class="place-name">${place.name}</h3>
-                    <span class="place-type ${place.type}">${getTypeLabel(place.type)}</span>
+                    <span class="place-type" style="background: ${categoryColor}20; color: ${categoryColor};">
+                        ${categoryName}
+                    </span>
                 </div>
                 <div class="place-address">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -810,16 +861,12 @@ function renderPlaces() {
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
-function getTypeLabel(type) {
-    const labels = {
-        attraction: '景点',
-        restaurant: '餐厅',
-        shopping: '购物'
-    };
-    return labels[type] || type;
+function getCategoryLabel(categoryId) {
+    const category = appData.categories.find(c => c.id === categoryId);
+    return category ? category.name : '未分类';
 }
 
 function renderStars(rating) {
@@ -830,19 +877,172 @@ function renderStars(rating) {
     return stars;
 }
 
-function initFilterTabs() {
-    const filterTabs = document.querySelectorAll('.filter-tab');
-    filterTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            filterTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            currentFilter = tab.dataset.filter;
+// 分类管理弹窗
+function openCategoryManager() {
+    const categories = appData.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    const body = `
+        <div class="category-manager">
+            <div class="category-list">
+                ${categories.map(cat => `
+                    <div class="category-item" data-cat-id="${cat.id}">
+                        <span class="category-color-dot" style="background: ${cat.color};"></span>
+                        <span class="category-name">${cat.name}</span>
+                        <div class="category-item-actions">
+                            <button class="btn-secondary btn-sm" onclick="editCategory('${cat.id}')">编辑</button>
+                            <button class="btn-danger btn-sm" onclick="deleteCategoryPlace('${cat.id}')">删除</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="btn-primary" onclick="openAddCategoryModal()" style="width: 100%; margin-top: 16px;">
+                + 添加新分类
+            </button>
+        </div>
+    `;
+    
+    openModal('管理分类', body, null, false);
+}
+
+function openAddCategoryModal() {
+    const body = `
+        <div class="form-group">
+            <label>分类名称 *</label>
+            <input type="text" id="newCatName" placeholder="如：温泉、神社">
+        </div>
+        <div class="form-group">
+            <label>颜色</label>
+            <div class="color-picker">
+                ${COLOR_POOL.map(color => `
+                    <span class="color-option" data-color="${color}" style="background: ${color};"></span>
+                `).join('')}
+            </div>
+            <input type="hidden" id="newCatColor" value="#4A90D9">
+        </div>
+    `;
+    
+    openModal('添加分类', body, () => {
+        const name = document.getElementById('newCatName').value.trim();
+        const color = document.getElementById('newCatColor').value;
+        
+        if (!name) {
+            showToast('请输入分类名称', 'error');
+            return;
+        }
+        
+        const maxOrder = Math.max(...appData.categories.map(c => c.order || 0), -1);
+        
+        appData.categories.push({
+            id: generateId(),
+            name,
+            color,
+            order: maxOrder + 1
+        });
+        
+        saveData(appData);
+        renderFilterTabs();
+        closeModal();
+        openCategoryManager();
+        showToast('已添加分类');
+    });
+}
+
+function editCategory(catId) {
+    const cat = appData.categories.find(c => c.id === catId);
+    if (!cat) return;
+    
+    const body = `
+        <div class="form-group">
+            <label>分类名称 *</label>
+            <input type="text" id="editCatName" value="${cat.name}" placeholder="分类名称">
+        </div>
+        <div class="form-group">
+            <label>颜色</label>
+            <div class="color-picker">
+                ${COLOR_POOL.map(color => `
+                    <span class="color-option ${cat.color === color ? 'selected' : ''}" data-color="${color}" style="background: ${color};"></span>
+                `).join('')}
+            </div>
+            <input type="hidden" id="editCatColor" value="${cat.color}">
+        </div>
+    `;
+    
+    openModal('编辑分类', body, () => {
+        const name = document.getElementById('editCatName').value.trim();
+        const color = document.getElementById('editCatColor').value;
+        
+        if (!name) {
+            showToast('请输入分类名称', 'error');
+            return;
+        }
+        
+        cat.name = name;
+        cat.color = color;
+        
+        saveData(appData);
+        renderFilterTabs();
+        renderPlaces();
+        closeModal();
+        openCategoryManager();
+        showToast('已更新分类');
+    });
+}
+
+function deleteCategoryPlace(catId) {
+    const cat = appData.categories.find(c => c.id === catId);
+    if (!cat) return;
+    
+    const placesUsingCat = appData.places.filter(p => p.categoryId === catId);
+    
+    if (placesUsingCat.length > 0) {
+        const body = `
+            <p style="margin-bottom: 16px;">该分类下有 ${placesUsingCat.length} 个地点，删除后这些地点将被设为"未分类"。</p>
+            <p>确定要删除分类「${cat.name}」吗？</p>
+        `;
+        openModal('删除分类', body, () => {
+            // 将使用该分类的地点设为未分类
+            appData.places.forEach(p => {
+                if (p.categoryId === catId) {
+                    p.categoryId = null;
+                }
+            });
+            // 删除分类
+            appData.categories = appData.categories.filter(c => c.id !== catId);
+            saveData(appData);
+            renderFilterTabs();
             renderPlaces();
+            closeModal();
+            openCategoryManager();
+            showToast('已删除分类');
+        });
+    } else {
+        if (!confirm(`确定要删除分类「${cat.name}」吗？`)) return;
+        appData.categories = appData.categories.filter(c => c.id !== catId);
+        saveData(appData);
+        renderFilterTabs();
+        closeModal();
+        openCategoryManager();
+        showToast('已删除分类');
+    }
+}
+
+function initIconPickerEvents() {
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            const hiddenInput = document.querySelector('#newCatColor, #editCatColor');
+            if (hiddenInput) hiddenInput.value = option.dataset.color;
         });
     });
 }
 
 function addPlace() {
+    const categories = appData.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+    const categoryOptions = categories.map(cat => 
+        `<option value="${cat.id}">${cat.name}</option>`
+    ).join('');
+    
     const body = `
         <div class="form-group">
             <label>名称 *</label>
@@ -850,11 +1050,10 @@ function addPlace() {
         </div>
         <div class="form-row">
             <div class="form-group">
-                <label>类型</label>
-                <select id="placeType">
-                    <option value="attraction">景点</option>
-                    <option value="restaurant">餐厅</option>
-                    <option value="shopping">购物</option>
+                <label>分类</label>
+                <select id="placeCategory">
+                    <option value="">请选择分类</option>
+                    ${categoryOptions}
                 </select>
             </div>
             <div class="form-group">
@@ -885,7 +1084,7 @@ function addPlace() {
         appData.places.push({
             id: generateId(),
             name,
-            type: document.getElementById('placeType').value,
+            categoryId: document.getElementById('placeCategory').value || null,
             rating: parseInt(document.getElementById('placeRating').value) || 0,
             address: document.getElementById('placeAddress').value.trim(),
             image: document.getElementById('placeImage').value.trim(),
@@ -903,6 +1102,11 @@ function addPlace() {
 function editPlace(placeId) {
     const place = appData.places.find(p => p.id === placeId);
     if (!place) return;
+    
+    const categories = appData.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+    const categoryOptions = categories.map(cat => 
+        `<option value="${cat.id}" ${place.categoryId === cat.id ? 'selected' : ''}>${cat.name}</option>`
+    ).join('');
 
     const body = `
         <div class="form-group">
@@ -911,11 +1115,10 @@ function editPlace(placeId) {
         </div>
         <div class="form-row">
             <div class="form-group">
-                <label>类型</label>
-                <select id="placeType">
-                    <option value="attraction" ${place.type === 'attraction' ? 'selected' : ''}>景点</option>
-                    <option value="restaurant" ${place.type === 'restaurant' ? 'selected' : ''}>餐厅</option>
-                    <option value="shopping" ${place.type === 'shopping' ? 'selected' : ''}>购物</option>
+                <label>分类</label>
+                <select id="placeCategory">
+                    <option value="">请选择分类</option>
+                    ${categoryOptions}
                 </select>
             </div>
             <div class="form-group">
@@ -944,7 +1147,7 @@ function editPlace(placeId) {
         }
 
         place.name = name;
-        place.type = document.getElementById('placeType').value;
+        place.categoryId = document.getElementById('placeCategory').value || null;
         place.rating = parseInt(document.getElementById('placeRating').value) || 0;
         place.address = document.getElementById('placeAddress').value.trim();
         place.image = document.getElementById('placeImage').value.trim();
@@ -1402,8 +1605,35 @@ async function loadFromGistForInitialSync() {
         const result = await GistSync.load();
         if (result.success) {
             appData = result.data;
+            // 确保 categories 字段存在（兼容旧数据）
+            if (!appData.categories) {
+                appData.categories = [
+                    { id: 'cat-place-1', name: '景点', color: '#4A90D9', order: 0 },
+                    { id: 'cat-place-2', name: '餐厅', color: '#E67E22', order: 1 },
+                    { id: 'cat-place-3', name: '购物', color: '#27AE60', order: 2 }
+                ];
+            }
+            // 清理 categories 中的 icon 字段
+            appData.categories.forEach(cat => {
+                if (cat.icon) delete cat.icon;
+            });
+            // 迁移旧数据中的 type 到 categoryId
+            if (appData.places) {
+                appData.places.forEach(place => {
+                    if (place.type && !place.categoryId) {
+                        const typeToCategory = {
+                            'attraction': 'cat-place-1',
+                            'restaurant': 'cat-place-2',
+                            'shopping': 'cat-place-3'
+                        };
+                        place.categoryId = typeToCategory[place.type] || null;
+                        delete place.type;
+                    }
+                });
+            }
             saveData(appData);
             // 只刷新各模块的 UI，不重新初始化
+            renderFilterTabs();
             renderItinerary();
             renderLuggage();
             renderPlaces();
@@ -1515,7 +1745,37 @@ async function initApp() {
     await autoLoadFromGist();
     appData = loadData();
     
+    // 确保 categories 字段存在（兼容旧数据）
+    if (!appData.categories) {
+        appData.categories = [
+            { id: 'cat-place-1', name: '景点', color: '#4A90D9', order: 0 },
+            { id: 'cat-place-2', name: '餐厅', color: '#E67E22', order: 1 },
+            { id: 'cat-place-3', name: '购物', color: '#27AE60', order: 2 }
+        ];
+    }
+    
+    // 清理 categories 中的 icon 字段
+    appData.categories.forEach(cat => {
+        if (cat.icon) delete cat.icon;
+    });
+    
+    // 迁移旧数据中的 type 到 categoryId
+    if (appData.places) {
+        appData.places.forEach(place => {
+            if (place.type && !place.categoryId) {
+                const typeToCategory = {
+                    'attraction': 'cat-place-1',
+                    'restaurant': 'cat-place-2',
+                    'shopping': 'cat-place-3'
+                };
+                place.categoryId = typeToCategory[place.type] || null;
+                delete place.type;
+            }
+        });
+    }
+    
     initDragAndDrop();
+    renderFilterTabs();
     renderItinerary();
     renderLuggage();
     renderPlaces();
@@ -1531,6 +1791,8 @@ function initEventListeners() {
     document.getElementById('addPlaceBtn').addEventListener('click', addPlace);
     document.getElementById('addHotelBtn').addEventListener('click', addHotel);
     document.getElementById('addNoteBtn').addEventListener('click', addNote);
+    // 分类管理按钮
+    document.getElementById('manageCategoriesBtn').addEventListener('click', openCategoryManager);
     // 桌面端导入/导出
     document.getElementById('exportBtn').addEventListener('click', exportData);
     document.getElementById('importBtn').addEventListener('click', importData);
@@ -1643,7 +1905,6 @@ function resetPull() {
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initModal();
-    initFilterTabs();
     initSettingsPanel();
     initEventListeners();
     initPullToRefresh();
