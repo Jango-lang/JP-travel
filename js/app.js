@@ -236,7 +236,7 @@ function openModal(title, bodyContent, onConfirm, showFooter = true) {
     }
 
     overlay.classList.add('active');
-    
+
     // 初始化图标和颜色选择器事件
     setTimeout(() => {
         initIconPickerEvents();
@@ -263,13 +263,13 @@ function updateCountdown() {
     const banner = document.getElementById('countdownBanner');
     const value = document.getElementById('countdownValue');
 
-    if (!appData.settings.startDate) {
+    if (!appData.itinerary?.[0]?.date) {
         banner.style.display = 'none';
         return;
     }
 
     banner.style.display = 'flex';
-    const start = new Date(appData.settings.startDate);
+    const start = new Date(appData.itinerary?.[0]?.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     start.setHours(0, 0, 0, 0);
@@ -503,12 +503,12 @@ function initDragAndDrop() {
 function handleDragStart(e) {
     const target = e.target.closest('[data-draggable]');
     if (!target) return;
-    
+
     draggedItem = target;
     draggedType = target.dataset.draggable;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', '');
-    
+
     target.style.opacity = '0.5';
 }
 
@@ -518,7 +518,7 @@ function handleDragEnd(e) {
     }
     draggedItem = null;
     draggedType = null;
-    
+
     document.querySelectorAll('.drag-over').forEach(el => {
         el.classList.remove('drag-over');
     });
@@ -527,7 +527,7 @@ function handleDragEnd(e) {
 function handleDragOver(e) {
     const target = e.target.closest('[data-draggable]');
     if (!target || target === draggedItem) return;
-    
+
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
 }
@@ -535,18 +535,18 @@ function handleDragOver(e) {
 function handleDragEnter(e) {
     const target = e.target.closest('[data-draggable]');
     if (!target || target === draggedItem) return;
-    
+
     target.classList.add('drag-over');
 }
 
 function handleDragLeave(e) {
     const target = e.target.closest('[data-draggable]');
     if (!target) return;
-    
+
     const rect = target.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
-    
+
     if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
         target.classList.remove('drag-over');
     }
@@ -554,17 +554,17 @@ function handleDragLeave(e) {
 
 function handleDrop(e) {
     e.preventDefault();
-    
+
     const target = e.target.closest('[data-draggable]');
     if (!target || target === draggedItem) return;
-    
+
     target.classList.remove('drag-over');
-    
+
     if (!draggedItem || draggedItem.dataset.draggable !== draggedType) return;
-    
+
     const draggedId = draggedItem.dataset.itemId;
     const targetId = target.dataset.itemId;
-    
+
     let dataArray;
     switch (draggedType) {
         case 'luggage':
@@ -579,15 +579,15 @@ function handleDrop(e) {
         default:
             return;
     }
-    
+
     const draggedIndex = dataArray.findIndex(item => item.id === draggedId);
     const targetIndex = dataArray.findIndex(item => item.id === targetId);
-    
+
     if (draggedIndex !== -1 && targetIndex !== -1) {
         const [removed] = dataArray.splice(draggedIndex, 1);
         dataArray.splice(targetIndex, 0, removed);
         saveData(appData);
-        
+
         switch (draggedType) {
             case 'luggage':
                 renderLuggage();
@@ -599,7 +599,7 @@ function handleDrop(e) {
                 renderNotes();
                 break;
         }
-        
+
         showToast('已调整顺序');
     }
 }
@@ -768,9 +768,9 @@ const COLOR_POOL = [
 function renderFilterTabs() {
     const filterTabs = document.querySelector('.filter-tabs');
     const categories = appData.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
-    
+
     let tabsHtml = `<button class="filter-tab ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">全部</button>`;
-    
+
     categories.forEach(cat => {
         tabsHtml += `<button class="filter-tab ${currentFilter === cat.id ? 'active' : ''}" 
                           data-filter="${cat.id}" 
@@ -778,9 +778,9 @@ function renderFilterTabs() {
                           ${cat.name}
                       </button>`;
     });
-    
+
     filterTabs.innerHTML = tabsHtml;
-    
+
     // 重新绑定点击事件
     filterTabs.querySelectorAll('.filter-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -815,7 +815,7 @@ function renderPlaces() {
         const category = appData.categories.find(c => c.id === place.categoryId);
         const categoryName = category ? category.name : '未分类';
         const categoryColor = category ? category.color : '#666';
-        
+
         return `
         <div class="place-card" data-draggable="place" data-item-id="${place.id}" draggable="true">
             <div class="place-image">
@@ -880,7 +880,7 @@ function renderStars(rating) {
 // 分类管理弹窗
 function openCategoryManager() {
     const categories = appData.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
-    
+
     const body = `
         <div class="category-manager">
             <div class="category-list">
@@ -900,7 +900,7 @@ function openCategoryManager() {
             </button>
         </div>
     `;
-    
+
     openModal('管理分类', body, null, false);
 }
 
@@ -920,25 +920,25 @@ function openAddCategoryModal() {
             <input type="hidden" id="newCatColor" value="#4A90D9">
         </div>
     `;
-    
+
     openModal('添加分类', body, () => {
         const name = document.getElementById('newCatName').value.trim();
         const color = document.getElementById('newCatColor').value;
-        
+
         if (!name) {
             showToast('请输入分类名称', 'error');
             return;
         }
-        
+
         const maxOrder = Math.max(...appData.categories.map(c => c.order || 0), -1);
-        
+
         appData.categories.push({
             id: generateId(),
             name,
             color,
             order: maxOrder + 1
         });
-        
+
         saveData(appData);
         renderFilterTabs();
         closeModal();
@@ -950,7 +950,7 @@ function openAddCategoryModal() {
 function editCategory(catId) {
     const cat = appData.categories.find(c => c.id === catId);
     if (!cat) return;
-    
+
     const body = `
         <div class="form-group">
             <label>分类名称 *</label>
@@ -966,19 +966,19 @@ function editCategory(catId) {
             <input type="hidden" id="editCatColor" value="${cat.color}">
         </div>
     `;
-    
+
     openModal('编辑分类', body, () => {
         const name = document.getElementById('editCatName').value.trim();
         const color = document.getElementById('editCatColor').value;
-        
+
         if (!name) {
             showToast('请输入分类名称', 'error');
             return;
         }
-        
+
         cat.name = name;
         cat.color = color;
-        
+
         saveData(appData);
         renderFilterTabs();
         renderPlaces();
@@ -991,9 +991,9 @@ function editCategory(catId) {
 function deleteCategoryPlace(catId) {
     const cat = appData.categories.find(c => c.id === catId);
     if (!cat) return;
-    
+
     const placesUsingCat = appData.places.filter(p => p.categoryId === catId);
-    
+
     if (placesUsingCat.length > 0) {
         const body = `
             <p style="margin-bottom: 16px;">该分类下有 ${placesUsingCat.length} 个地点，删除后这些地点将被设为"未分类"。</p>
@@ -1039,10 +1039,10 @@ function initIconPickerEvents() {
 
 function addPlace() {
     const categories = appData.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
-    const categoryOptions = categories.map(cat => 
+    const categoryOptions = categories.map(cat =>
         `<option value="${cat.id}">${cat.name}</option>`
     ).join('');
-    
+
     const body = `
         <div class="form-group">
             <label>名称 *</label>
@@ -1102,9 +1102,9 @@ function addPlace() {
 function editPlace(placeId) {
     const place = appData.places.find(p => p.id === placeId);
     if (!place) return;
-    
+
     const categories = appData.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
-    const categoryOptions = categories.map(cat => 
+    const categoryOptions = categories.map(cat =>
         `<option value="${cat.id}" ${place.categoryId === cat.id ? 'selected' : ''}>${cat.name}</option>`
     ).join('');
 
@@ -1744,7 +1744,7 @@ async function initApp() {
     // 尝试从 Gist 加载数据
     await autoLoadFromGist();
     appData = loadData();
-    
+
     // 确保 categories 字段存在（兼容旧数据）
     if (!appData.categories) {
         appData.categories = [
@@ -1753,12 +1753,12 @@ async function initApp() {
             { id: 'cat-place-3', name: '购物', color: '#27AE60', order: 2 }
         ];
     }
-    
+
     // 清理 categories 中的 icon 字段
     appData.categories.forEach(cat => {
         if (cat.icon) delete cat.icon;
     });
-    
+
     // 迁移旧数据中的 type 到 categoryId
     if (appData.places) {
         appData.places.forEach(place => {
@@ -1773,7 +1773,7 @@ async function initApp() {
             }
         });
     }
-    
+
     initDragAndDrop();
     renderFilterTabs();
     renderItinerary();
